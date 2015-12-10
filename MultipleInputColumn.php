@@ -8,15 +8,17 @@
 
 namespace esoftkz\multipleinput;
 
-use esoftkz\multipleinput\components\BaseColumn;
 use yii\base\Model;
+use esoftkz\multipleinput\components\BaseColumn;
 
 /**
- * Class TabularColumn
+ * Class MultipleInputColumn
  * @package esoftkz\multipleinput
  */
-class TabularColumn extends BaseColumn
+class MultipleInputColumn extends BaseColumn
 {
+
+
     /**
      * Returns element's name.
      *
@@ -26,33 +28,43 @@ class TabularColumn extends BaseColumn
      */
     public function getElementName($index, $withPrefix = true)
     {
+		
         if (is_null($index)) {
-           $index = '{multiple_index}';
+            $index = '{multiple_index_in}';			
         }
 		
+		$elementName = '[' . $index . '][' . $this->name . ']';
 		
-        $elementName = '[' . $index . '][' . $this->name . ']';
+			
         $prefix = $withPrefix ? $this->getModel()->formName() : '';
         return  $prefix . $elementName;
     }
-
-	public function getColumnId()
-    {
-        return $this->getModel()->id;
-    }
 	
-    /**
-     * Returns first error of the current model.
-     *
-     * @param $index
-     * @return string
-     */
+	 public function getValue($index)
+     {
+		
+        if (is_null($index)) {
+            return 0;			
+        }else{
+			 return  $index;
+		}	
+     }
+
+	 public function getPhoneId()
+     {		
+		 
+		
+       return $this->getModel()->phone_id;
+     }
+
+    
+
     public function getFirstError($index)
     {
         return $this->getModel()->getFirstError($this->name);
     }
-
-    /**
+	
+	/**
      * Ensure that model is an instance of yii\base\Model.
      *
      * @param $model

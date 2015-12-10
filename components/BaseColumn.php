@@ -6,7 +6,7 @@
  * @license https://github.com/unclead/yii2-multiple-input/blob/master/LICENSE.md
  */
 
-namespace unclead\widgets\components;
+namespace esoftkz\multipleinput\components;
 
 use Closure;
 use yii\base\InvalidConfigException;
@@ -20,7 +20,7 @@ use yii\helpers\Inflector;
 /**
  * Class BaseColumn.
  *
- * @package unclead\widgets\components
+ * @package esoftkz\multipleinput\components
  */
 abstract class BaseColumn extends Object
 {
@@ -176,6 +176,7 @@ abstract class BaseColumn extends Object
         } else {
             if ($data instanceof ActiveRecord ) {
                 $value = $data->getAttribute($this->name);
+				
             } elseif ($data instanceof Model) {
                 $value = $data->{$this->name};
             } elseif (is_array($data)) {
@@ -228,10 +229,19 @@ abstract class BaseColumn extends Object
      */
     public function renderInput($name, $options)
     {
+		
+		
         $options = Arrayhelper::merge($this->options, $options);
         $method = 'render' . Inflector::camelize($this->type);
-        $value = $this->prepareValue();
-
+		
+		if(!isset($options['value']))
+			$value = $this->prepareValue();
+		else
+			$value = $options['value'];
+		
+		
+			
+		
         if (isset($options['items'])) {
             $options['items'] = $this->prepareItems($options['items']);
         }
@@ -396,6 +406,8 @@ abstract class BaseColumn extends Object
     protected function renderWidget($type, $name, $value, $options)
     {
         $model = $this->getModel();
+		
+		
         if ($model instanceof Model) {
             $widgetOptions = [
                 'model'     => $model,

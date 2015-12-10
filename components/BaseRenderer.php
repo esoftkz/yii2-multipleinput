@@ -6,7 +6,7 @@
  * @license https://github.com/unclead/yii2-multiple-input/blob/master/LICENSE.md
  */
 
-namespace unclead\widgets\components;
+namespace esoftkz\multipleinput\components;
 
 use Yii;
 use yii\helpers\Html;
@@ -17,13 +17,13 @@ use yii\base\Object;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
 use yii\web\View;
-use unclead\widgets\MultipleInput;
-use unclead\widgets\TabularInput;
-use unclead\widgets\assets\MultipleInputAsset;
+use esoftkz\multipleinput\MultipleInput;
+use esoftkz\multipleinput\TabularInput;
+use esoftkz\multipleinput\assets\MultipleInputAsset;
 
 /**
  * Class BaseRenderer
- * @package unclead\widgets\components
+ * @package esoftkz\multipleinput\components
  */
 abstract class BaseRenderer extends Object
 {
@@ -83,6 +83,7 @@ abstract class BaseRenderer extends Object
      */
     public $columnClass;
 
+	
 
     /**
      * @var TabularInput|MultipleInput
@@ -94,6 +95,8 @@ abstract class BaseRenderer extends Object
      */
     public $addButtonPosition = self::POS_ROW;
 
+	public $in = false;
+	
     /**
      * @param $context
      */
@@ -192,19 +195,23 @@ abstract class BaseRenderer extends Object
                 'renderer' => $this
             ], $column);
 
-            if ($this->context instanceof MultipleInput) {
-                $definition['widget'] = $this->context;
-            }
+          
             $column = Yii::createObject($definition);
             $this->columns[$i] = $column;
         }
+	
+		
     }
 
     public function render()
     {
         $this->initColumns();
         $content = $this->internalRender();
-        $this->registerClientScript();
+		if($this->in !== true)
+			$this->registerClientScript();
+		else
+			$this->registerClientScript2();
+		
         return $content;
     }
 
@@ -221,10 +228,15 @@ abstract class BaseRenderer extends Object
     protected function registerClientScript()
     {
         $view = $this->context->getView();
-        MultipleInputAsset::register($view);
+		
+		MultipleInputAsset::register($view);
 
         $jsBefore = $this->collectJsTemplates();
         $template = $this->prepareTemplate();
+		$template = str_replace(['ObjectsPhonesItems[0]'], "ObjectsPhonesItems[{multiple_index_in}]", $template);
+		$template = str_replace(['objectsphonesitems-0-phone'], "objectsphonesitems-{multiple_index_in}-phone", $template);
+		
+	
         $jsTemplates = $this->collectJsTemplates($jsBefore);
 
         $options = Json::encode(
@@ -239,6 +251,20 @@ abstract class BaseRenderer extends Object
         );
 
         $js = "jQuery('#{$this->id}').multipleInput($options);";
+        $view->registerJs($js);
+    }
+	
+	protected function registerClientScript2()
+    {
+        $view = $this->context->getView();
+		
+        $template = $this->prepareTemplate();
+		$template = str_replace(['ObjectsPhonesItems[0]'], "ObjectsPhonesItems[{multiple_index_in}]", $template);
+		$template = str_replace(['objectsphonesitems-0-phone'], "objectsphonesitems-{multiple_index_in}-phone", $template);
+		$template= Json::encode($template);
+	
+
+        $js = "jQuery('#{$this->id}').data('template', '{$template}');";
         $view->registerJs($js);
     }
 
