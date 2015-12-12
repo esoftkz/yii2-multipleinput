@@ -6,7 +6,7 @@
  * @license https://github.com/unclead/yii2-multiple-input/blob/master/LICENSE.md
  */
 
-namespace unclead\widgets\components;
+namespace esoftkz\multipleinput\components;
 
 use Closure;
 use yii\base\InvalidConfigException;
@@ -20,7 +20,7 @@ use yii\helpers\Inflector;
 /**
  * Class BaseColumn.
  *
- * @package unclead\widgets\components
+ * @package esoftkz\multipleinput\components
  */
 abstract class BaseColumn extends Object
 {
@@ -176,6 +176,7 @@ abstract class BaseColumn extends Object
         } else {
             if ($data instanceof ActiveRecord ) {
                 $value = $data->getAttribute($this->name);
+				
             } elseif ($data instanceof Model) {
                 $value = $data->{$this->name};
             } elseif (is_array($data)) {
@@ -226,20 +227,34 @@ abstract class BaseColumn extends Object
      * @param array $options the input options
      * @return string
      */
-    public function renderInput($name, $options)
+    public function renderInput($name, $options, $index = null)
     {
+		
+		
         $options = Arrayhelper::merge($this->options, $options);
         $method = 'render' . Inflector::camelize($this->type);
-        $value = $this->prepareValue();
-
+		
+		if(!isset($options['value']))
+			$value = $this->prepareValue();
+		else{
+		
+			
+			$value = $options['value'];
+		}
+			
+		
+		
+		
         if (isset($options['items'])) {
             $options['items'] = $this->prepareItems($options['items']);
         }
 
         if (method_exists($this, $method)) {
-            $input = call_user_func_array([$this, $method], [$name, $value, $options]);
+			
+            $input = call_user_func_array([$this, $method], [$name, $value, $options, $index]);
         } else {
-            $input = $this->renderDefault($name, $value, $options);
+            $input = $this->renderDefault($name, $value, $options, $index);
+			
         }
         return $input;
     }
@@ -253,7 +268,7 @@ abstract class BaseColumn extends Object
      * @param $options
      * @return string
      */
-    protected function renderDropDownList($name, $value, $options)
+    protected function renderDropDownList($name, $value, $options, $index)
     {
         Html::addCssClass($options, 'form-control');
         return Html::dropDownList($name, $value, $this->prepareItems($this->items), $options);
@@ -280,7 +295,7 @@ abstract class BaseColumn extends Object
      * @param $options
      * @return string
      */
-    protected function renderListBox($name, $value, $options)
+    protected function renderListBox($name, $value, $options, $index)
     {
         Html::addCssClass($options, 'form-control');
         return Html::listBox($name, $value, $this->prepareItems($this->items), $options);
@@ -292,7 +307,7 @@ abstract class BaseColumn extends Object
      * @param $options
      * @return string
      */
-    protected function renderHiddenInput($name, $value, $options)
+    protected function renderHiddenInput($name, $value, $options, $index)
     {
         return Html::hiddenInput($name, $value, $options);
     }
@@ -303,7 +318,7 @@ abstract class BaseColumn extends Object
      * @param $options
      * @return string
      */
-    protected function renderRadio($name, $value, $options)
+    protected function renderRadio($name, $value, $options, $index)
     {
         if (!isset($options['label'])) {
             $options['label'] = '';
@@ -321,7 +336,7 @@ abstract class BaseColumn extends Object
      * @param $options
      * @return string
      */
-    protected function renderRadioList($name, $value, $options)
+    protected function renderRadioList($name, $value, $options, $index)
     {
         if (!array_key_exists('unselect', $options)) {
             $options['unselect'] = '';
@@ -339,7 +354,7 @@ abstract class BaseColumn extends Object
      * @param $options
      * @return string
      */
-    protected function renderCheckbox($name, $value, $options)
+    protected function renderCheckbox($name, $value, $options, $index)
     {
         if (!isset($options['label'])) {
             $options['label'] = '';
@@ -357,7 +372,7 @@ abstract class BaseColumn extends Object
      * @param $options
      * @return string
      */
-    protected function renderCheckboxList($name, $value, $options)
+    protected function renderCheckboxList($name, $value, $options, $index)
     {
         if (!array_key_exists('unselect', $options)) {
             $options['unselect'] = '';
@@ -376,36 +391,65 @@ abstract class BaseColumn extends Object
      * @return string
      * @throws InvalidConfigException
      */
-    protected function renderDefault($name, $value, $options)
+    protected function renderDefault($name, $value, $options, $index)
     {
         $type = $this->type;
 
+		
+		
         if ($type == self::TYPE_STATIC) {
             $input = Html::tag('p', $value, ['class' => 'form-control-static']);
         } elseif (method_exists('yii\helpers\Html', $type)) {
             Html::addCssClass($options, 'form-control');
             $input = Html::$type($name, $value, $options);
         } elseif (class_exists($type) && method_exists($type, 'widget')) {
-            $input = $this->renderWidget($type, $name, $value, $options);
+			
+            $input = $this->renderWidget($type, $name, $value, $options, $index);
         } else {
             throw new InvalidConfigException("Invalid column type '$type'");
         }
         return $input;
     }
 
-    protected function renderWidget($type, $name, $value, $options)
+    protected function renderWidget($type, $name, $value, $options, $index)
     {
         $model = $this->getModel();
+		
+		
         if ($model instanceof Model) {
-            $widgetOptions = [
-                'model'     => $model,
-                'attribute' => $this->name,
-                'value'     => $value,
-                'options'   => [
-                    'id' => $this->normalize($name),
-                    'name' => $name
-                ]
-            ];
+			
+			
+			if($type == 'yii\widgets\MaskedInput' && empty($value)){
+				 $widgetOptions = [
+					'name'  => $name,
+					'value' => $value,
+					'options'   => [
+						'id' => $this->normalize($name),						
+					],
+				];
+			}else{
+				
+				if($type == 'yii\widgets\MaskedInput' ){
+					$n = $this->name;
+					$model->$n = $value;
+				}				
+				$widgetOptions = [
+					'model'     => $model,
+					'attribute' => $this->name,
+					'value'     => $value,
+					'options'   => [
+						'id' => $this->normalize($name),
+						'name' => $name
+					],
+					'index' => $index
+				];
+				
+			}
+			
+			
+			
+			
+			
         } else {
             $widgetOptions = [
                 'name'  => $name,

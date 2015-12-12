@@ -9,23 +9,30 @@
 namespace esoftkz\multipleinput;
 
 use Yii;
-use yii\base\InvalidConfigException;
 use yii\base\Model;
-use yii\db\ActiveRecord;
+use yii\widgets\InputWidget;
 use yii\bootstrap\Widget;
-use esoftkz\multipleinput\renderers\TableRenderer;
+use yii\db\ActiveRecord;
+use esoftkz\multipleinput\renderers\TableRenderer2;
+
 
 /**
- * Class TabularInput
- * @package esoftkz\multipleinput
+ * Widget for rendering multiple input for an attribute of model.
+ *
+ * @author Eugene Tupikov <unclead.nsk@gmail.com>
  */
-class TabularInput extends Widget
+class MultipleInput extends InputWidget
 {
     const POS_HEADER    = 0;
     const POS_ROW       = 1;
 
     /**
-     * @var array
+     * @var Model[]|ActiveRecord[]
+     */
+    public $models;
+
+    /**
+     * @var array columns configuration
      */
     public $columns = [];
 
@@ -33,11 +40,6 @@ class TabularInput extends Widget
      * @var integer inputs limit
      */
     public $limit;
-
-    /**
-     * @var int minimum number of rows
-     */
-    public $min;
 
     /**
      * @var array client-side attribute options, e.g. enableAjaxValidation. You may use this property in case when
@@ -62,42 +64,39 @@ class TabularInput extends Widget
     public $allowEmptyList = false;
 
     /**
-     * @var Model[]|ActiveRecord[]
+     * @var int minimum number of rows
      */
-    public $models;
+    public $min;
 
     /**
      * @var string position of add button. By default button is rendered in the row.
      */
     public $addButtonPosition = self::POS_ROW;
 
+	
+   public $index = 0;
 
-    /**
+	
+	/**
      * Initialization.
      *
      * @throws \yii\base\InvalidConfigException
      */
     public function init()
     {
-        if (empty($this->models)) {
-            throw new InvalidConfigException('You must specify "models"');
-        }
-
-        foreach ($this->models as $model) {
-            if (!$model instanceof Model) {
-                throw new InvalidConfigException('Model has to be an instance of yii\base\Model');
-            }
-        }
-
+       
         parent::init();
     }
 
+    
+    
+    
     /**
      * Run widget.
      */
     public function run()
     {
-        return $this->createRenderer()->render();
+        return $this->createRenderer();
     }
 
     /**
@@ -105,27 +104,26 @@ class TabularInput extends Widget
      */
     private function createRenderer()
     {
+		
         $config = [
             'id'                => $this->options['id'],
             'columns'           => $this->columns,
-            'limit'             => $this->limit,
-            'attributeOptions'  => $this->attributeOptions,
             'data'              => $this->models,
-            'columnClass'       => TabularColumn::className(),
-            'allowEmptyList'    => $this->allowEmptyList,
-            'min'               => $this->min,
-            'addButtonPosition' => $this->addButtonPosition,
+            'columnClass'       => MultipleInputColumn::className(),
+			'model' => $this->model,
+			'index' => $this->index,
+			'min'               => $this->min,
+			'addButtonPosition' => $this->addButtonPosition,
+			'limit'             => $this->limit,
+			'attributeOptions'  => $this->attributeOptions,
+
+			'in' => true,
             'context'           => $this
         ];
+		$render = new TableRenderer2($config);
+		
+		return $render->render();
 
-        if (!is_null($this->removeButtonOptions)) {
-            $config['removeButtonOptions'] = $this->removeButtonOptions;
-        }
-
-        if (!is_null($this->addButtonOptions)) {
-            $config['addButtonOptions'] = $this->addButtonOptions;
-        }
-
-        return new TableRenderer($config);
+       
     }
 }

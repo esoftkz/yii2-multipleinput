@@ -6,7 +6,7 @@
  * @license https://github.com/unclead/yii2-multiple-input/blob/master/LICENSE.md
  */
 
-namespace unclead\widgets\components;
+namespace esoftkz\multipleinput\components;
 
 use Yii;
 use yii\helpers\Html;
@@ -17,13 +17,13 @@ use yii\base\Object;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
 use yii\web\View;
-use unclead\widgets\MultipleInput;
-use unclead\widgets\TabularInput;
-use unclead\widgets\assets\MultipleInputAsset;
+use esoftkz\multipleinput\MultipleInput;
+use esoftkz\multipleinput\TabularInput;
+use esoftkz\multipleinput\assets\MultipleInputAsset;
 
 /**
  * Class BaseRenderer
- * @package unclead\widgets\components
+ * @package esoftkz\multipleinput\components
  */
 abstract class BaseRenderer extends Object
 {
@@ -83,6 +83,7 @@ abstract class BaseRenderer extends Object
      */
     public $columnClass;
 
+	
 
     /**
      * @var TabularInput|MultipleInput
@@ -94,6 +95,8 @@ abstract class BaseRenderer extends Object
      */
     public $addButtonPosition = self::POS_ROW;
 
+	public $in = false;
+	
     /**
      * @param $context
      */
@@ -192,19 +195,22 @@ abstract class BaseRenderer extends Object
                 'renderer' => $this
             ], $column);
 
-            if ($this->context instanceof MultipleInput) {
-                $definition['widget'] = $this->context;
-            }
+          
             $column = Yii::createObject($definition);
             $this->columns[$i] = $column;
         }
+	
+		
     }
 
     public function render()
     {
         $this->initColumns();
         $content = $this->internalRender();
-        $this->registerClientScript();
+		
+		$this->registerClientScript();
+	
+		
         return $content;
     }
 
@@ -220,21 +226,32 @@ abstract class BaseRenderer extends Object
      */
     protected function registerClientScript()
     {
-        $view = $this->context->getView();
-        MultipleInputAsset::register($view);
-
+        $view = $this->context->getView();		
+		MultipleInputAsset::register($view);
+		
         $jsBefore = $this->collectJsTemplates();
+		
         $template = $this->prepareTemplate();
+		$template = str_replace(['ObjectsPhonesItems[0]'], "ObjectsPhonesItems[{multiple_index_in}]", $template);
+		$template = str_replace(['objectsphonesitems-0-phone'], "objectsphonesitems-{multiple_index_in}-phone", $template);
+		
+		
+
         $jsTemplates = $this->collectJsTemplates($jsBefore);
+		if($this->in != true)
+			$jsTemplates2 = $this->collectJsTemplates2($jsBefore);
+		
 
         $options = Json::encode(
             [
                 'id'                => $this->id,
                 'template'          => $template,
                 'jsTemplates'       => $jsTemplates,
+				'jsTemplates2'       => $jsTemplates2,
                 'limit'             => $this->limit,
                 'min'               => $this->min,
                 'attributeOptions'  => $this->attributeOptions,
+				'in_flag' => $this->in == true ? true : false
             ]
         );
 
@@ -257,6 +274,7 @@ abstract class BaseRenderer extends Object
                 if (array_key_exists($key, $except)) {
                     continue;
                 }
+				
                 if (preg_match('/^[^{]+{multiple_index}.*$/m', $js) === 1) {
                     $output[$key] = $js;
                     unset($view->js[View::POS_READY][$key]);
@@ -265,4 +283,26 @@ abstract class BaseRenderer extends Object
         }
         return $output;
     }
+	
+	protected function collectJsTemplates2($except = [])
+    {
+		$view = $this->context->getView();
+        $output = [];
+        if (is_array($view->js) && array_key_exists(View::POS_READY, $view->js)) {
+            foreach ($view->js[View::POS_READY] as $key => $js) {
+                if (array_key_exists($key, $except)) {
+                    continue;
+                }
+				
+				if (preg_match('/^[^{]+{multiple_index_in}.*$/m', $js) === 1 ){
+					$output[$key] = $js; 
+					unset($view->js[View::POS_READY][$key]);
+				}
+				
+				
+            }
+        }
+        return $output;
+		
+	}
 }

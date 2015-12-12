@@ -17,9 +17,14 @@ use esoftkz\multipleinput\components\BaseColumn;
 /**
  * Class TableRenderer
  * @package esoftkz\multipleinput\renderers
- */
-class TableRenderer extends BaseRenderer
+ */ 
+ 
+class TableRenderer2 extends BaseRenderer
 {
+	
+	public $model;
+	
+	public $index;
     /**
      * @return mixed
      */
@@ -27,77 +32,18 @@ class TableRenderer extends BaseRenderer
     {
         $content = [];
 
-        if ($this->hasHeader()) {
-            $content[] = $this->renderHeader();
-        }
-
         $content[] = $this->renderBody();
         $content = Html::tag('table', implode("\n", $content), [
-            'class' => 'multiple-input-list table table-condensed'
+            'class' => 'multiple-input-list-in table table-condensed'
         ]);
 
         return Html::tag( 'div', $content, [
             'id' => $this->id,
-            'class' => 'multiple-input'
+            'class' => 'multiple-input-in'
         ]);
     }
 
-    /**
-     * Renders the header.
-     *
-     * @return string
-     */
-    public function renderHeader()
-    {
-        $cells = [];
-        foreach ($this->columns as $column) {
-            /* @var $column BaseColumn */
-            $cells[] = $this->renderHeaderCell($column);
-        }
-
-        if (is_null($this->limit) || $this->limit > 1) {
-            $button = $this->min == 0 || $this->addButtonPosition == self::POS_HEADER ? $this->renderAddButton() : '';
-            $cells[] = Html::tag('th', $button, [
-                'class' => 'list-cell__button'
-            ]);
-        }
-
-        return Html::tag('thead', Html::tag('tr', implode("\n", $cells)));
-    }
-
-    /**
-     * Check that at least one column has a header.
-     *
-     * @return bool
-     */
-    private function hasHeader()
-    {
-        if ($this->min == 0) {
-            return true;
-        }
-        foreach ($this->columns as $column) {
-            /* @var $column BaseColumn */
-            if (!empty($column->title)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Renders the header cell.
-     * @param BaseColumn $column
-     * @return null|string
-     */
-    private function renderHeaderCell($column)
-    {
-        if ($column->isHiddenInput()) {
-            return null;
-        }
-        $options = $column->headerOptions;
-        Html::addCssClass($options, 'list-cell__' . $column->name);
-        return Html::tag('th', $column->title, $options);
-    }
+    
 
     /**
      * Renders the body.
@@ -107,58 +53,67 @@ class TableRenderer extends BaseRenderer
     protected function renderBody()
     {
         $rows = [];
-
-        if (!empty($this->data)) {
+        if (!empty($this->data) ) {
+			$sensor = null;
             foreach ($this->data as $index => $item) {
-                $rows[] = $this->renderRowContent($index, $item);
+				if($sensor != $item->phone_id){
+					$sensor = $item->phone_id;
+					$flag_button = true;
+				}else{
+					$flag_button = false;
+				}
+				$row = $this->renderRowContent($index, $item, $flag_button);
+				if($row != false)
+					$rows[] = $row;
+				
+				if(empty($this->model->id))
+					break;
+				
             }
-        } elseif ($this->min > 0) {
-            for ($i = 0; $i < $this->min; $i++) {
-                $rows[] = $this->renderRowContent($i);
-            }
-        }
+        }		
         return Html::tag('tbody', implode("\n", $rows));
     }
-
-    /**
-     * Renders the row content.
-     *
-     * @param int $index
-     * @param ActiveRecord|array $item
-     * @return mixed
-     * @throws InvalidConfigException
-     */
-    private function renderRowContent($index = null, $item = null)
+ 
+    private function renderRowContent($index = null, $item = null, $flag_button = false)
     {
+				
         $cells = [];
         $hiddenInputs = [];
+		$flag = false;
+			
+		foreach ($this->columns as $column) {	
+						
+			if($item != null)
+				$column->setModel($item);
+			
+			if(($this->model->id == $column->getPhoneId()) || (empty($this->model->id))  || ($index === null && $item === null)  ){
+				if ($column->isHiddenInput()) {
+					$hiddenInputs[] = $this->renderCellContent($column, $index);
+				} else {
+					$cells[] = $this->renderCellContent($column, $index);			
+				}
+				$flag = true;
+			}
+			
+		}
+		if($flag != true)
+			return false;
 		
-        foreach ($this->columns as $column) {
-			
-			
-			
-            /* @var $column BaseColumn */
-            $column->setModel($item);
-            if ($column->isHiddenInput()) {
-                $hiddenInputs[] = $this->renderCellContent($column, $index);
-            } else {
-				
-                $cells[] = $this->renderCellContent($column, $index);
-            }
-        }
+		
+		if($flag_button == true)	
+			$cells[] = $this->renderActionColumn(0);
+		else
+			$cells[] = $this->renderActionColumn($index);
 
-        $cells[] = $this->renderActionColumn($index);
+		if (!empty($hiddenInputs)) {
+			$hiddenInputs = implode("\n", $hiddenInputs);
+			$cells[0] = preg_replace('/^(<td[^>]+>)(.*)(<\/td>)$/s', '${1}' . $hiddenInputs . '$2$3', $cells[0]);
+		}
 
-        if (!empty($hiddenInputs)) {
-            $hiddenInputs = implode("\n", $hiddenInputs);
-            $cells[0] = preg_replace('/^(<td[^>]+>)(.*)(<\/td>)$/s', '${1}' . $hiddenInputs . '$2$3', $cells[0]);
-        }
-
-        $content = Html::tag('tr', implode("\n", $cells), [
-            'class' => 'multiple-input-list__item',
-			'data-index' => is_null($index) ? '{multiple_index}' : $index
-        ]);
-
+		$content = Html::tag('tr', implode("\n", $cells), [
+			'class' => 'multiple-input-list-in__item',
+		]);
+		
         return $content;
     }
 
@@ -171,12 +126,45 @@ class TableRenderer extends BaseRenderer
      */
     public function renderCellContent($column, $index)
     {
+		
         $id    = $column->getElementId($index);
-        $name  = $column->getElementName($index);
-
-        $input = $column->renderInput($name, [
-            'id' => $id,			
-        ], $index);
+		
+		$name  = $column->getElementName($index);
+		
+	
+		
+		if ($column->isHiddenInput()) {	
+			if(empty($this->model->id)){
+				$input = $column->renderInput($name, [
+					'id' => $id,
+					'value' => 0
+				]);		
+			}else{
+				$input = $column->renderInput($name, [
+					'id' => $id,
+					'value' => $this->index
+				]);		
+			}
+			
+		}else{
+				
+			if(!is_null($index) && !empty($this->model->id)){
+				$input = $column->renderInput($name, [
+					'id' => $id,
+					'value' => $column->getModel()->phone
+				]);	
+				
+			}else{			
+				$input = $column->renderInput($name, [
+					'id' => $id,
+					'value' => ''				
+				]);
+				
+			}
+				
+		}
+		
+      
 
         if ($column->isHiddenInput()) {
             return $input;
@@ -220,10 +208,11 @@ class TableRenderer extends BaseRenderer
 
     private function getActionButton($index)
     {
+			
         if (is_null($index) || $this->min == 0) {
             return $this->renderRemoveButton();
         }
-
+		
         $index += 1;
         if ($index < $this->min || $index == $this->limit) {
             return '';
@@ -237,7 +226,7 @@ class TableRenderer extends BaseRenderer
     private function renderAddButton()
     {
         $options = [
-            'class' => 'btn multiple-input-list__btn js-input-plus',
+            'class' => 'btn multiple-input-list-in__btn js-input-plus-in',
         ];
         Html::addCssClass($options, $this->addButtonOptions['class']);
         return Html::tag('div', $this->addButtonOptions['label'], $options);
@@ -252,7 +241,7 @@ class TableRenderer extends BaseRenderer
     private function renderRemoveButton()
     {
         $options = [
-            'class' => 'btn multiple-input-list__btn js-input-remove',
+            'class' => 'btn multiple-input-list-in__btn js-input-remove-in',
         ];
         Html::addCssClass($options, $this->removeButtonOptions['class']);
         return Html::tag('div', $this->removeButtonOptions['label'], $options);
