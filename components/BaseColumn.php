@@ -236,6 +236,7 @@ abstract class BaseColumn extends Object
 		
 		if(!isset($options['value']))
 			$value = $this->prepareValue();
+<<<<<<< HEAD
 		else{
 		
 			
@@ -244,6 +245,13 @@ abstract class BaseColumn extends Object
 			
 		
 		
+=======
+		else
+			$value = $options['value'];
+		
+		
+			
+>>>>>>> origin/master
 		
         if (isset($options['items'])) {
             $options['items'] = $this->prepareItems($options['items']);

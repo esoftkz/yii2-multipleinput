@@ -73,8 +73,13 @@ class MultipleInput extends InputWidget
      */
     public $addButtonPosition = self::POS_ROW;
 
+<<<<<<< HEAD
 	
    public $index = 0;
+=======
+
+   
+>>>>>>> origin/master
 
 	
 	/**
@@ -111,7 +116,11 @@ class MultipleInput extends InputWidget
             'data'              => $this->models,
             'columnClass'       => MultipleInputColumn::className(),
 			'model' => $this->model,
+<<<<<<< HEAD
 			'index' => $this->index,
+=======
+			'model123' => $this->model,
+>>>>>>> origin/master
 			'min'               => $this->min,
 			'addButtonPosition' => $this->addButtonPosition,
 			'limit'             => $this->limit,

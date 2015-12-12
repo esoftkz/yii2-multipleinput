@@ -24,7 +24,11 @@ class TableRenderer2 extends BaseRenderer
 	
 	public $model;
 	
+<<<<<<< HEAD
 	public $index;
+=======
+	public $model123;
+>>>>>>> origin/master
     /**
      * @return mixed
      */
@@ -54,6 +58,7 @@ class TableRenderer2 extends BaseRenderer
     {
         $rows = [];
         if (!empty($this->data) ) {
+<<<<<<< HEAD
 			$sensor = null;
             foreach ($this->data as $index => $item) {
 				if($sensor != $item->phone_id){
@@ -69,11 +74,21 @@ class TableRenderer2 extends BaseRenderer
 				if(empty($this->model->id))
 					break;
 				
+=======
+            foreach ($this->data as $index => $item) {
+				
+				$row = $this->renderRowContent($index, $item);
+				if($row != false)
+					$rows[] = $row;
+				if(empty($this->model->id))
+					break;
+>>>>>>> origin/master
             }
         }		
         return Html::tag('tbody', implode("\n", $rows));
     }
  
+<<<<<<< HEAD
     private function renderRowContent($index = null, $item = null, $flag_button = false)
     {
 				
@@ -87,6 +102,27 @@ class TableRenderer2 extends BaseRenderer
 				$column->setModel($item);
 			
 			if(($this->model->id == $column->getPhoneId()) || (empty($this->model->id))  || ($index === null && $item === null)  ){
+=======
+    private function renderRowContent($index = null, $item = null)
+    {
+		
+		
+        $cells = [];
+        $hiddenInputs = [];
+		$flag = false;
+		
+		
+		
+		foreach ($this->columns as $column) {	
+			
+			/* @var $column BaseColumn */	
+			if($item != null)
+				$column->setModel($item);
+			
+			
+			
+			if(($this->model->id == $column->getPhoneId()) || ($index === null && $item === null) || empty($this->model->id)){
+>>>>>>> origin/master
 				if ($column->isHiddenInput()) {
 					$hiddenInputs[] = $this->renderCellContent($column, $index);
 				} else {
@@ -98,12 +134,17 @@ class TableRenderer2 extends BaseRenderer
 		}
 		if($flag != true)
 			return false;
+<<<<<<< HEAD
 		
 		
 		if($flag_button == true)	
 			$cells[] = $this->renderActionColumn(0);
 		else
 			$cells[] = $this->renderActionColumn($index);
+=======
+			
+		$cells[] = $this->renderActionColumn($index);
+>>>>>>> origin/master
 
 		if (!empty($hiddenInputs)) {
 			$hiddenInputs = implode("\n", $hiddenInputs);
@@ -128,6 +169,7 @@ class TableRenderer2 extends BaseRenderer
     {
 		
         $id    = $column->getElementId($index);
+<<<<<<< HEAD
 		
 		$name  = $column->getElementName($index);
 		
@@ -162,6 +204,24 @@ class TableRenderer2 extends BaseRenderer
 				
 			}
 				
+=======
+        $name  = $column->getElementName($index);
+		if ($column->isHiddenInput()) {	
+			$input = $column->renderInput($name, [
+				'id' => $id,
+				'value' => $column->getValue($index)
+			]);		
+		}else{
+			if(!is_null($index) && !empty($this->model->id))
+				$input = $column->renderInput($name, [
+					'id' => $id		
+				]);		
+			else
+				$input = $column->renderInput($name, [
+					'id' => $id,
+					'value' => ''					
+				]);
+>>>>>>> origin/master
 		}
 		
       
@@ -208,11 +268,18 @@ class TableRenderer2 extends BaseRenderer
 
     private function getActionButton($index)
     {
+<<<<<<< HEAD
 			
         if (is_null($index) || $this->min == 0) {
             return $this->renderRemoveButton();
         }
 		
+=======
+        if (is_null($index) || $this->min == 0) {
+            return $this->renderRemoveButton();
+        }
+
+>>>>>>> origin/master
         $index += 1;
         if ($index < $this->min || $index == $this->limit) {
             return '';

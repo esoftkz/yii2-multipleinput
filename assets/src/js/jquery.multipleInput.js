@@ -53,12 +53,19 @@
         template: null,
         // string that collect js templates of widgets which uses in the columns
         jsTemplates: [],
+<<<<<<< HEAD
 		jsTemplates2: [],
         // how many row has to renders
         limit: 1,
         // minimum number of rows
         min: 1,
 		in_flag: false
+=======
+        // how many row has to renders
+        limit: 1,
+        // minimum number of rows
+        min: 1
+>>>>>>> origin/master
     };
 
     var defaultAttributeOptions = {
@@ -70,7 +77,10 @@
 
     var methods = {
         init: function (options) {
+<<<<<<< HEAD
 			
+=======
+>>>>>>> origin/master
             var settings = $.extend(true, {}, defaultOptions, options || {}),
                 $wrapper = $('#' + settings.id),
                 form = $wrapper.closest('form'),
@@ -89,6 +99,7 @@
                 methods.removeInput.apply(this);
             });
 			
+<<<<<<< HEAD
 
 			$wrapper.on('click.multipleInput', '.js-input-plus', function (e) {
 				e.preventDefault();
@@ -104,6 +115,22 @@
 					methods.removeInputIn.apply(this);
 				});
 			}
+=======
+			 $wrapper.on('click.multipleInput', '.js-input-remove-in', function (e) {
+                e.preventDefault();
+                methods.removeInputIn.apply(this);
+            });
+
+            $wrapper.on('click.multipleInput', '.js-input-plus', function (e) {
+                e.preventDefault();
+                methods.addInput.apply(this);
+            });
+			
+			 $wrapper.on('click.multipleInput', '.js-input-plus-in', function (e) {
+                e.preventDefault();
+                methods.addInputIn.apply(this);
+            });
+>>>>>>> origin/master
 
             var intervalID = setInterval(function(){
                 if (typeof form.data('yiiActiveForm') === 'object') {
@@ -153,7 +180,10 @@
                 return;
             }
 			
+<<<<<<< HEAD
 		
+=======
+>>>>>>> origin/master
 			
             template = template.replaceAll('{multiple_index}', data.currentIndex);
 			template = template.replaceAll('{multiple_index_in}', data.currentIndex_in);
@@ -171,6 +201,7 @@
             for (i in settings.jsTemplates) {
                 jsTemplate = settings.jsTemplates[i]
                     .replaceAll('{multiple_index}', data.currentIndex)
+<<<<<<< HEAD
 					.replaceAll('{multiple_index_in}', data.currentIndex_in)
                     .replaceAll('%7Bmultiple_index%7D', data.currentIndex)
 					.replaceAll('%7Bmultiple_index_in%7D', data.currentIndex_in);
@@ -189,6 +220,11 @@
 		
 			
 			
+=======
+                    .replaceAll('%7Bmultiple_index%7D', data.currentIndex);
+                window.eval(jsTemplate);
+            }
+>>>>>>> origin/master
             $wrapper.data('multipleInput').currentIndex++;
 			$wrapper.data('multipleInput').currentIndex_in++;
 			
@@ -197,6 +233,7 @@
         },
 		
 		addInputIn: function () {
+<<<<<<< HEAD
            var $wrapper    = $(this).closest('.multiple-input').first(),				
 				$wrapperin    = $(this).closest('.multiple-input-in').first(),
                 data        = $wrapper.data('multipleInput'),
@@ -205,6 +242,15 @@
 				inputList   = $wrapperin.find('.multiple-input-list-in').first();
 				
 			
+=======
+           var $wrapper    = $(this).closest('.multiple-input').first(),
+				$wrapperin    = $(this).closest('.multiple-input-in').first(),
+                data        = $wrapper.data('multipleInput'),
+				template = $wrapperin.data('template'),
+				inputList   = $wrapperin.find('.multiple-input-list-in').first();
+				
+				
+>>>>>>> origin/master
 			
 			var parent_index = $(this).closest('.multiple-input-list__item').first().data('index');
 			
@@ -213,11 +259,17 @@
 			template = template.replaceAll('{multiple_index_in}', data.currentIndex_in);
 			template = template.replaceAll('value="0"', 'value="'+parent_index+'"');
 			
+<<<<<<< HEAD
+=======
+			
+			template = $.parseHTML(template);	
+>>>>>>> origin/master
             $(template).hide().appendTo(inputList).fadeIn(300);
 			
 			$(template).find('input, select, textarea').each(function () {
                 methods.addAttribute.apply(this);
             });
+<<<<<<< HEAD
 			
 			var jsTemplate2;			
             for (i in settings.jsTemplates2) {				
@@ -230,6 +282,8 @@
 			
 			
 			
+=======
+>>>>>>> origin/master
 			$wrapper.data('multipleInput').currentIndex_in++;
  
         },

@@ -207,9 +207,16 @@ abstract class BaseRenderer extends Object
     {
         $this->initColumns();
         $content = $this->internalRender();
+<<<<<<< HEAD
 		
 		$this->registerClientScript();
 	
+=======
+		if($this->in !== true)
+			$this->registerClientScript();
+		else
+			$this->registerClientScript2();
+>>>>>>> origin/master
 		
         return $content;
     }
@@ -226,17 +233,28 @@ abstract class BaseRenderer extends Object
      */
     protected function registerClientScript()
     {
+<<<<<<< HEAD
         $view = $this->context->getView();		
 		MultipleInputAsset::register($view);
 		
+=======
+        $view = $this->context->getView();
+		
+		MultipleInputAsset::register($view);
+
+>>>>>>> origin/master
         $jsBefore = $this->collectJsTemplates();
 		
         $template = $this->prepareTemplate();
 		$template = str_replace(['ObjectsPhonesItems[0]'], "ObjectsPhonesItems[{multiple_index_in}]", $template);
 		$template = str_replace(['objectsphonesitems-0-phone'], "objectsphonesitems-{multiple_index_in}-phone", $template);
 		
+<<<<<<< HEAD
 		
 
+=======
+	
+>>>>>>> origin/master
         $jsTemplates = $this->collectJsTemplates($jsBefore);
 		if($this->in != true)
 			$jsTemplates2 = $this->collectJsTemplates2($jsBefore);
@@ -256,6 +274,20 @@ abstract class BaseRenderer extends Object
         );
 
         $js = "jQuery('#{$this->id}').multipleInput($options);";
+        $view->registerJs($js);
+    }
+	
+	protected function registerClientScript2()
+    {
+        $view = $this->context->getView();
+		
+        $template = $this->prepareTemplate();
+		$template = str_replace(['ObjectsPhonesItems[0]'], "ObjectsPhonesItems[{multiple_index_in}]", $template);
+		$template = str_replace(['objectsphonesitems-0-phone'], "objectsphonesitems-{multiple_index_in}-phone", $template);
+		$template= Json::encode($template);
+	
+
+        $js = "jQuery('#{$this->id}').data('template', '{$template}');";
         $view->registerJs($js);
     }
 

@@ -176,7 +176,11 @@ class TableRenderer extends BaseRenderer
 
         $input = $column->renderInput($name, [
             'id' => $id,			
+<<<<<<< HEAD
         ], $index);
+=======
+        ]);
+>>>>>>> origin/master
 
         if ($column->isHiddenInput()) {
             return $input;

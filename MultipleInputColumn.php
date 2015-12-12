@@ -33,8 +33,11 @@ class MultipleInputColumn extends BaseColumn
             $index = '{multiple_index_in}';			
         }
 		
+<<<<<<< HEAD
 		
 		
+=======
+>>>>>>> origin/master
 		$elementName = '[' . $index . '][' . $this->name . ']';
 		
 			
@@ -53,7 +56,13 @@ class MultipleInputColumn extends BaseColumn
      }
 
 	 public function getPhoneId()
+<<<<<<< HEAD
      {			
+=======
+     {		
+		 
+		
+>>>>>>> origin/master
        return $this->getModel()->phone_id;
      }
 
